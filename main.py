@@ -1,4 +1,4 @@
-from utils.dataset import open_dataset
+from src.utils.dataset import open_dataset
 
 
 def main():
