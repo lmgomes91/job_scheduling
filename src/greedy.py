@@ -62,45 +62,128 @@ class Greedy:
 
     def set_jobs(self, service_orders: list[dict]):
 
-        for service_order in service_orders:
-            if not len(service_order['jobs']):
+        order_candidate = {
+            'CV01': {
+                'id': 0,
+                'time': 0,
+                'service_index': 0
+            },
+            'CV02': {
+                'id': 0,
+                'time': 0,
+                'service_index': 0
+            },
+            'FPA01': {
+                'id': 0,
+                'time': 0,
+                'service_index': 0
+            },
+            'FPA02': {
+                'id': 0,
+                'time': 0,
+                'service_index': 0
+            },
+            'RH01': {
+                'id': 0,
+                'time': 0,
+                'service_index': 0
+            },
+            'CC01': {
+                'id': 0,
+                'time': 0,
+                'service_index': 0
+            },
+            'CC02': {
+                'id': 0,
+                'time': 0,
+                'service_index': 0
+            },
+            'CL03': {
+                'id': 0,
+                'time': 0,
+                'service_index': 0
+            },
+            'CL11': {
+                'id': 0,
+                'time': 0,
+                'service_index': 0
+            },
+            'CL15': {
+                'id': 0,
+                'time': 0,
+                'service_index': 0
+            },
+            'CL21': {
+                'id': 0,
+                'time': 0,
+                'service_index': 0
+            }
+        }
+
+        for i in range(0, len(service_orders)):
+            if not len(service_orders[i]['jobs']):
                 continue
 
             ready = True
             for machine in self.history_process:
-                if len(self.history_process[machine]) and self.history_process[machine][-1] == service_order['id'] and \
+                if len(self.history_process[machine]) and\
+                        self.history_process[machine][-1] == service_orders[i]['id'] and \
                         self.time < self.time_process[machine]:
                     ready = False
                     break
 
-            if ready and self.state_process[service_order['jobs'][0][0]]:
-                self.state_process[service_order['jobs'][0][0]] = False
-                self.time_process[service_order['jobs'][0][0]] = self.time + service_order['jobs'][0][1]
-                self.history_process[service_order['jobs'][0][0]].append(service_order['id'])
-                service_order['jobs'].pop(0)
+            if ready and self.state_process[service_orders[i]['jobs'][0][0]]:
+                if order_candidate[service_orders[i]['jobs'][0][0]]['id'] != 0 and \
+                        order_candidate[service_orders[i]['jobs'][0][0]]['time'] < service_orders[i]['jobs'][0][1]:
+
+                    order_candidate[service_orders[i]['jobs'][0][0]] = {
+                        'id': service_orders[i]['id'],
+                        'time': service_orders[i]['jobs'][0][1],
+                        'service_index': i
+                    }
+                else:
+                    order_candidate[service_orders[i]['jobs'][0][0]] = {
+                        'id': service_orders[i]['id'],
+                        'time': service_orders[i]['jobs'][0][1],
+                        'service_index': i
+                    }
+
+        for key in order_candidate:
+            if order_candidate[key]['id'] != 0:
+                self.state_process[key] = False
+                self.time_process[key] = self.time + order_candidate[key]['time']
+                self.history_process[key].append(order_candidate[key]['id'])
+                service_orders[order_candidate[key]['service_index']]['jobs'].pop(0)
+
+    @staticmethod
+    def clean_orders_done(service_orders: list[dict]):
+        orders_to_remove = []
+        for i in range(len(service_orders) - 1, 0, -1):
+            if len(service_orders[i]['jobs']) == 0:
+                orders_to_remove.append(i)
+
+        for order in orders_to_remove:
+            service_orders.pop(order)
 
     def run(self, data: list[dict]):
+        orders_per_time = 10
+        service_orders = data[:orders_per_time]
+        data = data[orders_per_time:]
 
-        interval = 10
-        init = 0
-        end = interval
+        while not self.are_all_jobs_non_empty(service_orders):
 
-        while True:
-            service_orders = copy.deepcopy(data[init:end])
+            self.set_jobs(service_orders)
 
-            while not self.are_all_jobs_non_empty(service_orders):
+            self.time += 1
 
-                self.set_jobs(service_orders)
+            self.clean_orders_done(service_orders)
 
-                self.time += 1
+            while len(service_orders) < orders_per_time:
+                if len(data):
+                    service_orders.append(data.pop(0))
+                else:
+                    break
 
-                self.verify_process()
+            self.verify_process()
 
-            init = end
-            end += interval
-
-            if init == 490:
-                end = 497
-            elif init == 497:
-                break
         print(f'Total time: {self.time_process[max(self.time_process, key=self.time_process.get)]}')

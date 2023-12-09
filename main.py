@@ -6,7 +6,6 @@ def main():
     data = format_data(open_dataset())
     solver = Greedy()
     solver.run(data)
-    print(solver.time_process)
 
 
 if __name__ == '__main__':
