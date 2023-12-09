@@ -1,9 +1,12 @@
-from src.utils.dataset import open_dataset
+from src.greedy import Greedy
+from src.utils.dataset import open_dataset, format_data
 
 
 def main():
-    df = open_dataset()
-    print(df.head())
+    data = format_data(open_dataset())
+    solver = Greedy()
+    solver.run(data)
+    print(solver.time_process)
 
 
 if __name__ == '__main__':
