@@ -60,6 +60,14 @@ class Greedy:
             if self.time == self.time_process[key]:
                 self.state_process[key] = True
 
+    def verify_job_ready(self, service_order: dict):
+        for process in self.history_process:
+            if len(self.history_process[process]) and \
+                    self.history_process[process][-1] == service_order['id'] and \
+                    self.time < self.time_process[process]:
+                return False
+        return True
+
     def set_jobs(self, service_orders: list[dict]):
 
         order_candidate = {
@@ -121,32 +129,23 @@ class Greedy:
         }
 
         for i in range(0, len(service_orders)):
-            if not len(service_orders[i]['jobs']):
+            if not len(service_orders[i]['jobs']) or \
+                    not self.verify_job_ready(service_orders[i]) or \
+                    not self.state_process[service_orders[i]['jobs'][0][0]]:
                 continue
 
-            ready = True
-            for machine in self.history_process:
-                if len(self.history_process[machine]) and\
-                        self.history_process[machine][-1] == service_orders[i]['id'] and \
-                        self.time < self.time_process[machine]:
-                    ready = False
-                    break
-
-            if ready and self.state_process[service_orders[i]['jobs'][0][0]]:
-                if order_candidate[service_orders[i]['jobs'][0][0]]['id'] != 0 and \
-                        order_candidate[service_orders[i]['jobs'][0][0]]['time'] < service_orders[i]['jobs'][0][1]:
-
-                    order_candidate[service_orders[i]['jobs'][0][0]] = {
-                        'id': service_orders[i]['id'],
-                        'time': service_orders[i]['jobs'][0][1],
-                        'service_index': i
-                    }
-                else:
-                    order_candidate[service_orders[i]['jobs'][0][0]] = {
-                        'id': service_orders[i]['id'],
-                        'time': service_orders[i]['jobs'][0][1],
-                        'service_index': i
-                    }
+            if order_candidate[service_orders[i]['jobs'][0][0]]['id'] == 0:
+                order_candidate[service_orders[i]['jobs'][0][0]] = {
+                    'id': service_orders[i]['id'],
+                    'time': service_orders[i]['jobs'][0][1],
+                    'service_index': i
+                }
+            elif order_candidate[service_orders[i]['jobs'][0][0]]['time'] < service_orders[i]['jobs'][0][1]:
+                order_candidate[service_orders[i]['jobs'][0][0]] = {
+                    'id': service_orders[i]['id'],
+                    'time': service_orders[i]['jobs'][0][1],
+                    'service_index': i
+                }
 
         for key in order_candidate:
             if order_candidate[key]['id'] != 0:
