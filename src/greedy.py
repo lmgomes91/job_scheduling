@@ -48,7 +48,7 @@ class Greedy:
         self.time = 0
 
     @staticmethod
-    def are_all_jobs_non_empty(service_orders: list[dict]) -> bool:
+    def are_all_orders_non_empty(service_orders: list[dict]) -> bool:
         for service_order in service_orders:
             if len(service_order['jobs']):
                 return False
@@ -169,7 +169,7 @@ class Greedy:
         service_orders = data[:orders_per_time]
         data = data[orders_per_time:]
 
-        while not self.are_all_jobs_non_empty(service_orders):
+        while not self.are_all_orders_non_empty(service_orders):
 
             self.set_jobs(service_orders)
 
