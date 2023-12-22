@@ -34,3 +34,30 @@ def format_data(dataset: pd.DataFrame) -> list:
         service_orders.append(service_order)
 
     return service_orders
+
+
+def format_data_no_machine_specify(dataset: pd.DataFrame) -> list:
+    service_orders = []
+
+    for _, row in dataset.iterrows():
+
+        service_order = {
+            'id': row['OS'],
+            'jobs': []
+        }
+
+        if row['CONVERTEDOR']:
+            service_order['jobs'].append(['CONVERTEDOR', row['Tempo1']])
+
+        if row['TRATAMENTO']:
+            service_order['jobs'].append(['TRATAMENTO', row['Tempo2']])
+
+        if row['TRATAMENTO.1']:
+            service_order['jobs'].append(['TRATAMENTO', row['Tempo3']])
+
+        if row['LINGOTAMENTO']:
+            service_order['jobs'].append(['LINGOTAMENTO', row['Tempo4']])
+
+        service_orders.append(service_order)
+
+    return service_orders

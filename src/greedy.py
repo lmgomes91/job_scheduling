@@ -140,7 +140,7 @@ class Greedy:
                     'time': service_orders[i]['jobs'][0][1],
                     'service_index': i
                 }
-            elif order_candidate[service_orders[i]['jobs'][0][0]]['time'] < service_orders[i]['jobs'][0][1]:
+            elif order_candidate[service_orders[i]['jobs'][0][0]]['time'] > service_orders[i]['jobs'][0][1]:
                 order_candidate[service_orders[i]['jobs'][0][0]] = {
                     'id': service_orders[i]['id'],
                     'time': service_orders[i]['jobs'][0][1],
